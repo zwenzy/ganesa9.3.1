@@ -33,33 +33,52 @@ class BiblioController extends Controller
 
     public function getPopular()
     {
-        $cache_name = 'biblio_popular';
-        if (!is_null($json = Cache::get($cache_name))) return parent::withJson($json);
-
         $limit = $this->sysconf['template']['classic_popular_collection_item'];
+
+        // Popularitas berdasarkan 1 tahun terakhir
+        $start = date('Y-m-d', strtotime('-1 year'));
+        $end = date('Y-m-d');
+
+        // Cache berdasarkan periode agar otomatis berubah ketika tanggal berubah
+        $cache_name = 'biblio_popular_' . $start . '_' . $end;
+
+        if (!is_null($json = Cache::get($cache_name))) {
+            return parent::withJson($json);
+        }
+
         $sql = "SELECT b.biblio_id, b.title, b.image, COUNT(*) AS total
-          FROM loan AS l
-          LEFT JOIN item AS i ON l.item_code=i.item_code
-          LEFT JOIN biblio AS b ON i.biblio_id=b.biblio_id
-          WHERE b.title IS NOT NULL
-          GROUP BY b.biblio_id
-          ORDER BY total DESC
-          LIMIT {$limit}";
+        FROM loan AS l
+        LEFT JOIN item AS i ON l.item_code=i.item_code
+        LEFT JOIN biblio AS b ON i.biblio_id=b.biblio_id
+        WHERE b.title IS NOT NULL
+        AND l.loan_date BETWEEN '{$start}' AND '{$end}'
+        GROUP BY b.biblio_id
+        ORDER BY total DESC
+        LIMIT {$limit}";
 
         $query = $this->db->query($sql);
+
         $return = array();
+
         while ($data = $query->fetch_assoc()) {
             $data['image'] = $this->getImagePath($data['image']);
             $return[] = $data;
         }
+
         if ($query->num_rows < $limit) {
             $need = $limit - $query->num_rows;
+
             if ($need < 0) {
                 $need = $limit;
             }
 
-            $sql = "SELECT biblio_id, title, image FROM biblio ORDER BY last_update DESC LIMIT {$need}";
+            $sql = "SELECT biblio_id, title, image
+            FROM biblio
+            ORDER BY last_update DESC
+            LIMIT {$need}";
+
             $query = $this->db->query($sql);
+
             while ($data = $query->fetch_assoc()) {
                 $data['image'] = $this->getImagePath($data['image']);
                 $return[] = $data;
@@ -67,6 +86,7 @@ class BiblioController extends Controller
         }
 
         Cache::set($cache_name, json_encode($return));
+
         parent::withJson($return);
     }
 

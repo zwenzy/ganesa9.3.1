@@ -106,16 +106,84 @@ while ($data = $stat_query->fetch_row()) {
 $stat_data = substr($stat_data,0,-1);
 $collection_stat[__('Total Items By Collection Type')] = $stat_data;
 
-// popular titles
-$stat_query = $dbs->query('SELECT title,biblio_id AS total_loans FROM `loan_history` WHERE member_id IS NOT NULL AND biblio_id IS NOT NULL
-    GROUP BY biblio_id ORDER BY COUNT(loan_id) DESC LIMIT 10');
-$stat_data = '<ol>';
-if(!empty($stat_query->num_rows)){
-    while ($data = $stat_query->fetch_row()) {
-        $stat_data .= '<li>'.$data[0].'</li>';
-    }
+
+$stat_query = $dbs->query('SELECT title, biblio_id, COUNT(loan_id) AS total_loans
+    FROM `loan_history`
+    WHERE member_id IS NOT NULL
+    AND biblio_id IS NOT NULL
+    AND loan_date BETWEEN \'' . $start . '\' AND \'' . $end . '\'
+    GROUP BY biblio_id
+    ORDER BY total_loans DESC
+    LIMIT 10');
+
+$stat_data = '';
+
+if (!isset($_POST['print'])) {
+    $stat_data = <<<HTML
+<form target="blindSubmit" method="post" class="form-inline chartLink" action="{$_SERVER['PHP_SELF']}">
+    <div style="display: flex; justify-content: left; align-items: center; margin-bottom: 8px">
+        <input value="{$start}" name="start" type="date" class="form-control" placeholder="From">
+        <span style="padding: 0px 8px">To</span>
+        <input value="{$end}" name="end" type="date" class="form-control" placeholder="To">
+        <button name="doFilter" type="submit" class="btn btn-primary" style="margin: 0 0 0 8px">Submit</button>
+    </div>
+</form>
+HTML;
 }
+
+$stat_data .= '<ol>';
+
+if (!empty($stat_query->num_rows)) {
+    while ($data = $stat_query->fetch_row()) {
+        $stat_data .= '<li>' . $data[0] . ' (<strong>' . $data[2] . '</strong>)</li>';
+    }
+} else {
+    $stat_data .= '<li><i>Tidak ada peminjaman pada periode ini</i></li>';
+}
+
 $stat_data .= '</ol>';
+
+$collection_stat[__('10 Most Popular Titles')] = $stat_data;
+// popular titles
+$start = isset($_POST['start']) ? utility::filterData('start', 'post') : date('Y-m-d', strtotime("-1 year"));
+$end = isset($_POST['end']) ? utility::filterData('end', 'post') : date('Y-m-d');
+
+$stat_query = $dbs->query('SELECT title, biblio_id, COUNT(loan_id) AS total_loans
+    FROM `loan_history`
+    WHERE member_id IS NOT NULL
+    AND biblio_id IS NOT NULL
+    AND loan_date BETWEEN \'' . $start . '\' AND \'' . $end . '\'
+    GROUP BY biblio_id
+    ORDER BY total_loans DESC
+    LIMIT 10');
+
+$stat_data = '';
+
+if (!isset($_POST['print'])) {
+    $stat_data = <<<HTML
+<form target="blindSubmit" method="post" class="form-inline chartLink" action="{$_SERVER['PHP_SELF']}">
+    <div style="display: flex; justify-content: left; align-items: center; margin-bottom: 8px">
+        <input value="{$start}" name="start" type="date" class="form-control" placeholder="From">
+        <span style="padding: 0px 8px">To</span>
+        <input value="{$end}" name="end" type="date" class="form-control" placeholder="To">
+        <button name="doFilter" type="submit" class="btn btn-primary" style="margin: 0 0 0 8px">Submit</button>
+    </div>
+</form>
+HTML;
+}
+
+$stat_data .= '<ol>';
+
+if (!empty($stat_query->num_rows)) {
+    while ($data = $stat_query->fetch_row()) {
+        $stat_data .= '<li>' . $data[0] . ' (<strong>' . $data[2] . '</strong>)</li>';
+    }
+} else {
+    $stat_data .= '<li><i>Tidak ada peminjaman pada periode ini</i></li>';
+}
+
+$stat_data .= '</ol>';
+
 $collection_stat[__('10 Most Popular Titles')] = $stat_data;
 
 // table header

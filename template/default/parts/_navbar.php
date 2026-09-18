@@ -113,8 +113,19 @@ HTML;
                   </div>
               </li>
           <?php } else { ?>
-              <li class="nav-item <?= $menu_member_active; ?>">
-                  <a class="nav-link" href="index.php?p=member"><?= __('Member Area') ?></a>
+              <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <?= __('Login') ?>
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="loginDropdown">
+                      <a class="dropdown-item" href="index.php?p=member">
+                          <i class="fas fa-user-tie mr-2"></i> <?= __('Member') ?>
+                      </a>
+                      <a class="dropdown-item" href="index.php?p=login">
+                          <i class="fas fa-user-tie mr-2"></i> <?= __('Librarian') ?>
+                      </a>
+                  </div>
               </li>
           <?php } ?>
             <li class="nav-item dropdown">

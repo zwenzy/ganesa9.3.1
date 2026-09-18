@@ -32,7 +32,7 @@ if (!defined('INDEX_AUTH')) {
 $page_title = __('Profile of our Librarian') ;
 
 // query librarian data
-$librarian_q = $dbs->query('SELECT * FROM user WHERE user_type IN (1,2) ORDER BY user_type DESC LIMIT 20');
+$librarian_q = $dbs->query('SELECT * FROM user ORDER BY realname ASC LIMIT 20');
 if ($librarian_q->num_rows > 0) {
   while ($librarian = $librarian_q->fetch_assoc()) {
     echo '<div class="row-fluid librarian">';

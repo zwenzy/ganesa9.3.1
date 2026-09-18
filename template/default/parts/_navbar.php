@@ -84,6 +84,32 @@ HTML;
             echo $menu_str;
           }
           ?>
+          <!-- Menu Panduan -->
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle"
+                href="#"
+                id="panduanDropdown"
+                role="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">
+                  <?= __('Panduan') ?>
+              </a>
+
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="panduanDropdown">
+                  <a class="dropdown-item" href="index.php?p=tata-tertib">
+                      <?= __('Tata Tertib') ?>
+                  </a>
+
+                  <a class="dropdown-item" href="index.php?p=kartu-member">
+                      <?= __('Tutorial Membuat Kartu Member') ?>
+                  </a>
+
+                  <a class="dropdown-item" href="index.php?p=prosedur-peminjaman">
+                      <?= __('Prosedur Peminjaman') ?>
+                  </a>
+              </div>
+          </li>
           <?php
           $menu_member_active = isset($_GET['p']) && $_GET['p'] === 'member' ? 'active' : '';
           if ($is_login) {
